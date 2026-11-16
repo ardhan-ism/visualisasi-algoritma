@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Demo Merge Sort, Activity Selection, dan 0/1 Knapsack beserta hasil uji Python."
+    />
+    <title>Visualisasi Algoritma · CV Abel Batuah Travel</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header class="site-head">
+      <div class="shell site-head-inner">
+        <div>
+          <strong>Kompleksitas Algoritma</strong
+          ><span class="site-context">CV Abel Batuah Travel</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <h1>Visualisasi algoritma</h1>
+      <div class="tab-list" role="tablist" aria-label="Pilih algoritma">
+        <button
+          type="button"
+          id="tab-merge"
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel"
+          data-algorithm="merge"
+        >
+          Merge Sort
+        </button>
+        <button
+          type="button"
+          id="tab-activity"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel"
+          data-algorithm="activity"
+          tabindex="-1"
+        >
+          Activity Selection
+        </button>
+        <button
+          type="button"
+          id="tab-knapsack"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel"
+          data-algorithm="knapsack"
+          tabindex="-1"
+        >
+          0/1 Knapsack
+        </button>
+      </div>
+
+      <section
+        id="panel"
+        role="tabpanel"
+        aria-labelledby="tab-merge"
+        tabindex="0"
+      >
+        <div class="section-heading algorithm-heading">
+          <div>
+            <h2 id="algorithm-title"></h2>
+            <p id="algorithm-description"></p>
+          </div>
+          <a class="jump-link" href="#hasil-uji"
+            >Hasil uji Python <span aria-hidden="true">↓</span></a
+          >
+        </div>
+
+        <div class="demo-layout">
+          <section class="visual-panel" aria-labelledby="visual-title">
+            <div class="visual-heading">
+              <h3 id="visual-title"></h3>
+              <button
+                type="button"
+                class="text-button"
+                id="dp-toggle"
+                aria-pressed="false"
+                hidden
+              >
+                Tabel lengkap
+              </button>
+            </div>
+            <div
+              id="visual"
+              tabindex="0"
+              role="region"
+              aria-labelledby="visual-title"
+            ></div>
+          </section>
+
+          <section class="step-panel" aria-labelledby="step-title">
+            <div class="step-progress">
+              <span id="step-counter"></span>
+              <progress id="progress" aria-label="Kemajuan demo"></progress>
+            </div>
+            <div
+              id="step-body"
+              tabindex="0"
+              role="region"
+              aria-label="Penjelasan langkah"
+            >
+              <div id="step-text" aria-live="polite" aria-atomic="true">
+                <h3 id="step-title"></h3>
+                <p id="step-description"></p>
+              </div>
+              <div id="step-detail"></div>
+            </div>
+            <div class="step-nav" aria-label="Navigasi langkah">
+              <button type="button" id="back">← Sebelumnya</button>
+              <button type="button" id="next">Berikutnya →</button>
+              <button type="button" class="text-button" id="reset">
+                Ulangi demo
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <section
+          class="benchmark-section"
+          id="hasil-uji"
+          aria-labelledby="benchmark-title"
+        >
+          <div class="section-heading">
+            <div>
+              <h2 id="benchmark-title">Hasil uji Python</h2>
+              <p id="benchmark-method"></p>
+            </div>
+            <a class="jump-link" href="#panel"
+              >Kembali ke demo <span aria-hidden="true">↑</span></a
+            >
+          </div>
+          <div id="benchmarks"></div>
+          <div id="analysis" hidden></div>
+        </section>
+      </section>
+
+      <noscript
+        ><p>
+          Aktifkan JavaScript di browser untuk membuka demo dan hasil uji.
+        </p></noscript
+      >
+      <footer>Tabel 3.1–3.3 · Studi kasus CV Abel Batuah Travel</footer>
+    </main>
+  </body>
+</html>
