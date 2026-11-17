@@ -161,11 +161,43 @@ const demos = {
   },
 };
 
-// Tambahkan ringkasan analisis per algoritma di sini saat materi laporan siap.
 const analyses = {
-  merge: "",
-  activity: "",
-  knapsack: "",
+  merge: {
+    time: "O(n log n)",
+    space: "O(n)",
+    trend: "Rata-rata naik dari 0,004199 ms untuk 10 rute menjadi 0,963925 ms untuk 1.000 rute. Penggabungan memproses total n data per tingkat, dan jumlah tingkat tumbuh secara logaritmik.",
+    strength: "Pengurutan stabil, sehingga rute dengan tarif yang sama mempertahankan urutan awal.",
+    limit: "Penggabungan membutuhkan daftar sementara dan pemanggilan rekursif.",
+  },
+  activity: {
+    time: "O(n log n) · kasus terburuk",
+    space: "O(n)",
+    trend: "Rata-rata naik dari 0,0029 ms untuk 10 jadwal menjadi 3,1084 ms untuk 10.000 jadwal. Pengurutan mendominasi waktu, sedangkan seleksi memeriksa setiap jadwal sekali.",
+    strength: "Memilih jumlah pesanan terbanyak tanpa bentrok untuk satu kendaraan.",
+    limit: "Untuk memaksimalkan pendapatan, model perlu memperhitungkan bobot atau nilai sewa tiap pesanan.",
+  },
+  knapsack: {
+    time: "O(n × W)",
+    space: "O(n × W)",
+    trend: "Pada kapasitas 60 kg, rata-rata naik dari 0,0316 ms untuk 5 paket menjadi 0,3435 ms untuk 50 paket. Pada 20 paket, kenaikan kapasitas dari 30 ke 120 kg meningkatkan rata-rata dari 0,0518 menjadi 0,2601 ms. Paket menambah baris tabel DP dan kapasitas menambah kolom.",
+    strength: "Menemukan ongkir maksimum dalam batas kapasitas serta menunjukkan paket pembentuk hasilnya.",
+    limit: "Kapasitas bernilai besar menambah waktu dan memori untuk tabel DP.",
+  },
+};
+
+const flowcharts = {
+  merge: {
+    file: "flowchart_merge_sort.png",
+    alt: "Alur Merge Sort. Periksa kasus dasar, bagi dan urutkan kedua bagian secara rekursif, lalu gabungkan dengan membandingkan tarif.",
+  },
+  activity: {
+    file: "flowchart_activity_selection.png",
+    alt: "Alur Activity Selection. Urutkan jadwal menurut jam selesai, lalu terima jadwal berikutnya jika waktu mulainya sama dengan atau melebihi jam selesai terakhir.",
+  },
+  knapsack: {
+    file: "flowchart_knapsack.png",
+    alt: "Alur 0/1 Knapsack. Isi tabel DP dengan pilihan ambil atau lewati, lalu telusuri tabel dari baris terakhir untuk menemukan paket terpilih.",
+  },
 };
 
 const $ = id => document.getElementById(id);
@@ -556,7 +588,7 @@ function drawChart(canvas, group) {
   ctx.textAlign = "center";
   for (const [x] of group.points) ctx.fillText(number(x), xp(x), bottom + 19);
 
-  ctx.strokeStyle = color("--ink");
+  ctx.strokeStyle = color("--accent");
   ctx.lineWidth = 2.5;
   ctx.beginPath();
   group.points.forEach(([x, y], index) => {
@@ -617,10 +649,20 @@ function renderBenchmarks(key) {
     chartObserver.observe(canvas);
   });
 
-  $("analysis").hidden = !analyses[key];
-  $("analysis").innerHTML = analyses[key]
-    ? `<section class="analysis-box"><h3>Ringkasan analisis</h3><p>${escapeHtml(analyses[key])}</p></section>`
-    : "";
+}
+
+function renderAnalysis(key) {
+  const analysis = analyses[key];
+  $("analysis-body").innerHTML = `
+    <dl class="complexity">
+      <div><dt>Waktu</dt><dd>${escapeHtml(analysis.time)}</dd></div>
+      <div><dt>Ruang tambahan</dt><dd>${escapeHtml(analysis.space)}</dd></div>
+    </dl>
+    <p>${escapeHtml(analysis.trend)}</p>
+    <ul class="analysis-notes">
+      <li><strong>Kelebihan.</strong> ${escapeHtml(analysis.strength)}</li>
+      <li><strong>Keterbatasan.</strong> ${escapeHtml(analysis.limit)}</li>
+    </ul>`;
 }
 
 const tabs = [...document.querySelectorAll("[data-algorithm]")];
@@ -677,6 +719,7 @@ function selectTab(key) {
   $("algorithm-description").textContent = demos[key].description;
   renderStep();
   renderBenchmarks(key);
+  renderAnalysis(key);
 }
 
 function moveStep(change) {
@@ -723,5 +766,30 @@ $("visual").addEventListener("click", event => {
   renderStep();
   $("visual").querySelector(`[data-weight="${inspectedWeight}"]`).focus({ preventScroll: true });
 });
+
+const flowchartDialog = $("flowchart-dialog");
+const flowchartViewport = $("flowchart-viewport");
+const flowchartZoom = $("flowchart-zoom");
+
+function setFlowchartZoom(zoomed) {
+  flowchartViewport.classList.toggle("is-zoomed", zoomed);
+  flowchartViewport.scrollTop = 0;
+  flowchartViewport.scrollLeft = 0;
+  flowchartZoom.textContent = zoomed ? "Sesuaikan ukuran" : "Perbesar";
+}
+
+$("flowchart-open").addEventListener("click", () => {
+  const chart = flowcharts[current];
+  const image = $("flowchart-image");
+  $("flowchart-title").textContent = "Flowchart " + demos[current].title;
+  image.alt = chart.alt;
+  image.src = "flowcharts/" + chart.file;
+  setFlowchartZoom(false);
+  flowchartDialog.showModal();
+});
+flowchartZoom.addEventListener("click", () => {
+  setFlowchartZoom(!flowchartViewport.classList.contains("is-zoomed"));
+});
+flowchartDialog.addEventListener("close", () => $("flowchart-open").focus({ preventScroll: true }));
 
 selectTab(current);
