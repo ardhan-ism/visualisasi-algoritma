@@ -35,6 +35,7 @@
   --line-strong: #91abc7;
   --accent: #446a92;
   --accent-hover: #385c83;
+  --code-active: #e2eefb;
   --radius: 18px;
   --demo-height: 29rem;
   font: 16px/1.5 Poppins, sans-serif;
@@ -88,38 +89,44 @@ h1 { margin: 32px 0 20px; font-size: clamp(2.15rem, 5vw, 4rem); letter-spacing: 
 .jump-link { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; white-space: nowrap; font-weight: 600; font-size: .85rem; }
 .jump-link span { margin-left: 3px; }
 .demo-layout {
-  display: grid; grid-template-columns: minmax(0, 2.1fr) minmax(300px, 1fr);
-  grid-template-rows: var(--demo-height); gap: 16px;
+  display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  grid-template-rows: var(--demo-height) 13rem; gap: 16px;
 }
-.visual-panel, .step-panel, .bench-card { border: 1px solid var(--line); border-radius: var(--radius); min-width: 0; }
-.visual-panel, .bench-card { background: var(--card); }
+.visual-panel, .code-panel, .step-panel, .bench-card { border: 1px solid var(--line); border-radius: var(--radius); min-width: 0; }
+.visual-panel, .code-panel, .bench-card { background: var(--card); }
 .visual-panel { display: grid; grid-template-rows: 28px minmax(0, 1fr); gap: 12px; min-height: 0; padding: 21px; }
 .visual-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
 .visual-heading h3, .bench-card h3 { font-size: 1rem; letter-spacing: -.015em; }
 
 .step-panel {
-  display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  display: grid; grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 14px; min-height: 0; padding: 21px; background: var(--soft);
 }
-#visual, #step-body {
+.step-progress { grid-column: 1 / -1; }
+#visual, #step-body, #code-view {
   min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain;
   scrollbar-color: var(--line-strong) transparent; scrollbar-gutter: stable;
   overflow-anchor: none;
 }
 #visual { padding: 3px 4px; }
-#step-body { padding: 2px 6px 2px 1px; }
+#step-body {
+  display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  align-content: start; gap: 16px; padding: 2px 6px 2px 1px;
+}
 .step-progress { color: var(--muted); font-size: .78rem; font-weight: 600; }
 progress { display: block; width: 100%; height: 5px; margin: 8px 0 0; border: none; border-radius: 8px; overflow: hidden; appearance: none; background: var(--shade); }
 progress::-webkit-progress-bar { background: var(--shade); }
 progress::-webkit-progress-value { background: var(--accent); }
 progress::-moz-progress-bar { background: var(--accent); }
-.step-panel h3 { font-size: clamp(1.25rem, 2.1vw, 1.75rem); letter-spacing: -.045em; }
+.step-panel h3 { font-size: 1.35rem; letter-spacing: -.045em; }
 .step-panel p { color: var(--muted); margin-top: 8px; font-size: .9rem; }
-#step-detail { margin-top: 12px; }
+#step-detail { min-width: 0; }
 .step-nav {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: 41px 25px; gap: 7px;
-  border-top: 1px solid var(--line); padding-top: 11px;
+  align-self: end; border-top: 1px solid var(--line); padding-top: 11px;
 }
 .step-nav button { border-radius: 9px; border: 1px solid var(--line-strong); background: var(--card); color: var(--ink); padding: 0 6px; font-weight: 600; font-size: .82rem; white-space: nowrap; }
 .step-nav button:hover:not(:disabled) { background: var(--shade); }
@@ -134,6 +141,38 @@ progress::-moz-progress-bar { background: var(--accent); }
 .step-data div + div { border-top: 1px solid var(--line); }
 .step-data dt { color: var(--muted); }
 .step-data dd { margin: 0; text-align: right; font-weight: 600; }
+
+.code-panel {
+  display: grid; grid-template-rows: 28px minmax(0, 1fr) auto;
+  gap: 12px; min-height: 0; padding: 21px 0 12px;
+}
+.code-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-inline: 17px; }
+.code-heading h3 { font-size: .9rem; white-space: nowrap; }
+.code-line-label {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  border-radius: 5px; padding: 3px 7px; background: var(--soft);
+  color: var(--accent-hover); font-size: .67rem; font-variant-numeric: tabular-nums;
+}
+#code-view { background: var(--paper); padding-block: 8px; }
+#code-view pre { margin: 0; min-width: max-content; }
+#python-code { display: block; font: .73rem/1.9 Poppins, sans-serif; tab-size: 4; }
+.code-line {
+  display: flex; min-height: 1.9em; padding-right: 16px;
+  border-left: 3px solid transparent; scroll-margin-block: 20px;
+}
+.code-line.is-active { background: var(--code-active); border-left-color: var(--accent); }
+.code-number {
+  flex: 0 0 3.3em; padding-right: 1em; text-align: right;
+  color: var(--muted); font-size: .9em; font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+.code-line.is-active .code-number { color: var(--accent-hover); font-weight: 600; }
+.code-source { white-space: pre; }
+.python-keyword { color: #355b83; font-weight: 600; }
+.python-string { color: #5f7290; }
+.python-number { color: #466c81; }
+.python-comment { color: var(--muted); font-style: italic; }
+#code-hint { padding-inline: 17px; color: var(--muted); font-size: .7rem; }
 
 .scroll-x { position: relative; overflow-x: auto; scrollbar-color: var(--line-strong) transparent; }
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
@@ -230,7 +269,10 @@ html:has(#flowchart-dialog[open]) { overflow: hidden; }
 
 @media (max-width: 935px) {
   :root { --demo-height: 25rem; }
-  .demo-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(2, var(--demo-height)); }
+  .demo-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(3, var(--demo-height)); }
+  .step-panel { grid-column: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; }
+  #step-body { display: block; }
+  #step-detail { margin-top: 12px; }
   .bench-layout { grid-template-columns: minmax(0, 1fr); gap: 12px; }
 }
 @media (max-width: 560px) {
@@ -244,6 +286,8 @@ html:has(#flowchart-dialog[open]) { overflow: hidden; }
   .algorithm-actions { gap: 6px 10px; }
   .algorithm-actions .outline-button, .algorithm-actions .jump-link { font-size: .77rem; }
   .visual-panel, .step-panel, .bench-card { padding: 14px; }
+  .code-panel { padding-top: 14px; }
+  .code-heading, #code-hint { padding-inline: 14px; }
   .visual-panel h3 { font-size: .9rem; }
   .visual-heading { gap: 5px; }
   #dp-toggle { font-size: .73rem; }

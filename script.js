@@ -200,6 +200,92 @@ const flowcharts = {
   },
 };
 
+const pythonExamples = {
+  merge: {
+    source: `def merge_sort(data):
+    if len(data) <= 1:
+        return data[:]
+
+    tengah = len(data) // 2
+    kiri = merge_sort(data[:tengah])
+    kanan = merge_sort(data[tengah:])
+    return merge(kiri, kanan)
+
+
+def merge(kiri, kanan):
+    hasil = []
+    i = 0
+    j = 0
+
+    while i < len(kiri) and j < len(kanan):
+        if kiri[i]["tarif"] <= kanan[j]["tarif"]:
+            hasil.append(kiri[i])
+            i += 1
+        else:
+            hasil.append(kanan[j])
+            j += 1
+
+    hasil.extend(kiri[i:])
+    hasil.extend(kanan[j:])
+    return hasil`,
+    highlights: {
+      start: [1],
+      split: [2, 5, 6, 7],
+      base: [2, 3],
+      result: [8, 26],
+    },
+  },
+  activity: {
+    source: `def activity_selection(jadwal):
+    urut = sorted(jadwal, key=lambda j: j["selesai"])
+    if not urut:
+        return []
+    terpilih = [urut[0]]
+    selesai_terakhir = urut[0]["selesai"]
+
+    for j in urut[1:]:
+        if j["mulai"] >= selesai_terakhir:
+            terpilih.append(j)
+            selesai_terakhir = j["selesai"]
+
+    return terpilih`,
+    highlights: {
+      start: [1],
+      sorted: [2],
+      result: [13],
+    },
+  },
+  knapsack: {
+    source: `def knapsack_01(data_bagasi, kapasitas):
+    n = len(data_bagasi)
+    dp = [[0] * (kapasitas + 1) for _ in range(n + 1)]
+
+    for i, paket in enumerate(data_bagasi, start=1):
+        for w in range(kapasitas + 1):
+            lewati = dp[i - 1][w]
+            dp[i][w] = lewati
+            if paket.berat <= w:
+                ambil = paket.ongkir + dp[i - 1][w - paket.berat]
+                dp[i][w] = max(lewati, ambil)
+
+    terpilih = []
+    w = kapasitas
+    for i in range(n, 0, -1):
+        paket = data_bagasi[i - 1]
+        if dp[i][w] > dp[i - 1][w]:
+            terpilih.append(paket)
+            w -= paket.berat
+
+    terpilih.reverse()
+    return terpilih, dp[n][kapasitas]`,
+    highlights: {
+      start: [1],
+      base: [2, 3],
+      result: [21, 22],
+    },
+  },
+};
+
 const $ = id => document.getElementById(id);
 const formatInteger = new Intl.NumberFormat("id-ID");
 const decimalFormats = new Map([4, 6].map(precision => [precision, new Intl.NumberFormat("id-ID", {
@@ -216,6 +302,84 @@ const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
 const time = minutes => [Math.floor(minutes / 60), minutes % 60]
   .map(part => String(part).padStart(2, "0")).join(".");
 const intervalLabel = item => time(item.mulai) + "–" + time(item.selesai);
+
+function pythonMarkup(source) {
+  const keywords = new Set([
+    "and", "def", "else", "for", "if", "in", "lambda", "not", "return", "while",
+  ]);
+  const tokens = /("[^"\n]*"|'[^'\n]*'|#[^\n]*|\b\d+\b|\b[a-zA-Z_]\w*\b)/g;
+  let result = "";
+  let previous = 0;
+  for (const match of source.matchAll(tokens)) {
+    const token = match[0];
+    result += escapeHtml(source.slice(previous, match.index));
+    let css = "";
+    if (keywords.has(token)) css = "python-keyword";
+    else if (token.startsWith('"') || token.startsWith("'")) css = "python-string";
+    else if (token.startsWith("#")) css = "python-comment";
+    else if (/^\d+$/.test(token)) css = "python-number";
+    result += css ? `<span class="${css}">${escapeHtml(token)}</span>` : escapeHtml(token);
+    previous = match.index + token.length;
+  }
+  return result + escapeHtml(source.slice(previous));
+}
+
+function codeSelection(key, frame, selectedWeight) {
+  if (key === "merge" && frame.type === "merge") {
+    const lines = [12, 13, 14, 16, 17];
+    if (frame.picks.some(step => step.pick === step.a)) lines.push(18, 19);
+    if (frame.picks.some(step => step.pick === step.b)) lines.push(20, 21, 22);
+    lines.push(24, 25, 26);
+    return { lines, focus: 16 };
+  }
+  if (key === "activity" && frame.type === "check") {
+    if (frame.last === null) return { lines: [5, 6] };
+    return { lines: frame.take ? [8, 9, 10, 11] : [8, 9] };
+  }
+  if (key === "knapsack" && frame.type === "fill") {
+    const lines = [5, 6, 7, 8, 9];
+    if (frame.item.berat <= selectedWeight) lines.push(10, 11);
+    return { lines };
+  }
+  if (key === "knapsack" && frame.type === "trace") {
+    const lines = frame.i === packages.length ? [13, 14] : [];
+    lines.push(15, 16, 17);
+    if (frame.take) lines.push(18, 19);
+    return { lines };
+  }
+  const lines = pythonExamples[key].highlights[frame.type];
+  return { lines, focus: frame.type === "result" ? lines.at(-1) : lines[0] };
+}
+
+function renderCode(key, frame, selectedWeight) {
+  const code = $("python-code");
+  const viewport = $("code-view");
+  if (code.dataset.algorithm !== key) {
+    code.innerHTML = pythonExamples[key].source.split("\n").map((line, index) =>
+      `<span class="code-line" data-line="${index + 1}"><span class="code-number" aria-hidden="true">${index + 1}</span><span class="code-source">${pythonMarkup(line) || " "}</span></span>`
+    ).join("");
+    code.dataset.algorithm = key;
+    viewport.scrollLeft = 0;
+    viewport.scrollTop = 0;
+  }
+
+  const { lines, focus = lines[0] } = codeSelection(key, frame, selectedWeight);
+  for (const line of code.querySelectorAll(".code-line")) {
+    const lineNumber = Number(line.dataset.line);
+    line.classList.toggle("is-active", lines.includes(lineNumber));
+    if (lineNumber === focus) line.setAttribute("aria-current", "step");
+    else line.removeAttribute("aria-current");
+  }
+  $("code-lines").textContent = "Baris " + lines.join(", ");
+  $("code-lines").title = "Baris tersorot " + lines.join(", ");
+
+  const active = code.querySelector(`[data-line="${focus}"]`);
+  const bounds = viewport.getBoundingClientRect();
+  const position = active.getBoundingClientRect();
+  if (position.top < bounds.top + 20 || position.bottom > bounds.bottom - 20) {
+    viewport.scrollTop += position.top - bounds.top - 24;
+  }
+}
 
 function stats(pairs = []) {
   if (pairs.length === 0) return "";
@@ -686,6 +850,7 @@ function renderStep() {
   $("step-title").textContent = view.title;
   $("step-description").textContent = view.description;
   $("step-detail").innerHTML = stats(view.details);
+  renderCode(current, frame, inspectedWeight);
   $("step-body").scrollTop = 0;
   $("visual").scrollTop = 0;
   $("step-counter").textContent = index === 0 ? `Data awal · ${last} langkah` : `Langkah ${index} dari ${last}`;
